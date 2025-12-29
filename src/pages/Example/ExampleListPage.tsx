@@ -36,7 +36,7 @@ const ExampleListPage: React.FC = () => {
       setLoading(true);
       const requestParams = params || searchParams;
       const response = await getExampleList(requestParams);
-      if (response.success) {
+      if (response.code === 200) {
         setExampleList(response.data.records);
         setTotal(response.data.total);
       } else {
@@ -109,7 +109,7 @@ const ExampleListPage: React.FC = () => {
     
     try {
       const response = await deleteExample(itemToDelete.id);
-      if (response.success) {
+      if (response.code === 200) {
         toast.success(t("examplePage.deleteSuccess"));
         fetchExampleList();
       } else {

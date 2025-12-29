@@ -52,7 +52,7 @@ export function ExampleCreateDialog({
         try {
             setLoading(true);
             const response = await getExampleDetail(exampleId);
-            if (response.success) {
+            if (response.code === 200) {
                 setFormData(response.data);
             } else {
                 toast.error(t(response.message || "examplePage.getDetailFailed"));
@@ -123,7 +123,7 @@ export function ExampleCreateDialog({
                 response = await createExample(formData);
             }
 
-            if (response.success) {
+            if (response.code === 200) {
                 toast.success(t(isEdit ? "examplePage.updateSuccess" : "examplePage.createSuccess"));
                 onSuccess?.();
                 onOpenChange(false);
