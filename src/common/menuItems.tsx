@@ -1,5 +1,6 @@
 import {
   FileText,
+  Scale,
 } from "lucide-react";
 
 // 定义菜单项接口
@@ -16,5 +17,10 @@ export const menuItems: MenuItem[] = [
     label: "system.menu.example", 
     icon: <FileText size={18} />, 
     path: "/example/list"
+  },
+  { 
+    label: "system.menu.unit", 
+    icon: <Scale size={18} />, 
+    path: "/unit/list"
   },
 ];
