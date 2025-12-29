@@ -1,0 +1,596 @@
+[
+    {
+        "id": "e0df2792d6930a1a",
+        "type": "http in",
+        "z": "0f4917b0fac269df",
+        "name": "获取示例列表",
+        "url": "/example/list",
+        "method": "post",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 130,
+        "y": 220,
+        "wires": [
+            [
+                "01c6b18949921bcb"
+            ]
+        ]
+    },
+    {
+        "id": "01c6b18949921bcb",
+        "type": "function",
+        "z": "0f4917b0fac269df",
+        "name": "验证参数",
+        "func": "// GET请求的参数在msg.payload中\nmsg.params = msg.payload;\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 320,
+        "y": 220,
+        "wires": [
+            [
+                "b5fe75f68bd38f81"
+            ]
+        ]
+    },
+    {
+        "id": "90b24e25783d1010",
+        "type": "function",
+        "z": "0f4917b0fac269df",
+        "name": "格式化响应",
+        "func": "// 获取查询参数\nconst { current = 1, pageSize = 10, code, name, status } = msg.params || {};\n// sql查表结果\nconst list = msg.payload[0] && msg.payload[0].json.data || [];\n\n// 根据查询参数过滤数据\nlet filteredData = list;\n\nif (code) {\n    filteredData = filteredData.filter(item => item.code && item.code.toLowerCase().includes(code.toLowerCase()));\n}\n\nif (name) {\n    filteredData = filteredData.filter(item => item.name && item.name.toLowerCase().includes(name.toLowerCase()));\n}\n\nif (status) {\n    filteredData = filteredData.filter(item => item.status && item.status.toLowerCase().includes(status.toLowerCase()));\n}\n\n// 计算分页\nconst total = filteredData.length;\nconst startIndex = (current - 1) * pageSize;\nconst endIndex = startIndex + parseInt(pageSize);\nlet records = filteredData.slice(startIndex, endIndex);\n\n// 构建响应\nconst response = {\n  code: 200,\n  success: true,\n  data: {\n    records: records,\n    current: parseInt(current),\n    pageSize: parseInt(pageSize),\n    total: total\n  }\n};\n\nmsg.payload = response;\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 750,
+        "y": 220,
+        "wires": [
+            [
+                "671543099991c651"
+            ]
+        ]
+    },
+    {
+        "id": "671543099991c651",
+        "type": "http response",
+        "z": "0f4917b0fac269df",
+        "name": "返回响应",
+        "statusCode": "200",
+        "headers": {},
+        "x": 940,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "b5fe75f68bd38f81",
+        "type": "postgresql",
+        "z": "0f4917b0fac269df",
+        "name": "searchExample",
+        "query": "select * from \"example\" ORDER BY \"timeStamp\" DESC limit 1;",
+        "postgreSQLConfig": "c48ecc2ef69b5a15",
+        "split": false,
+        "rowsPerMsg": "1",
+        "outputs": 1,
+        "x": 530,
+        "y": 220,
+        "wires": [
+            [
+                "90b24e25783d1010"
+            ]
+        ]
+    },
+    {
+        "id": "6e78e2ef32410ae0",
+        "type": "http in",
+        "z": "0f4917b0fac269df",
+        "name": "获取示例详情",
+        "url": "/example/detail",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 120,
+        "y": 320,
+        "wires": [
+            [
+                "dc464f2b7f0e5e44"
+            ]
+        ]
+    },
+    {
+        "id": "dc464f2b7f0e5e44",
+        "type": "function",
+        "z": "0f4917b0fac269df",
+        "name": "验证参数",
+        "func": "// GET请求的参数在msg.payload中\nmsg.params = msg.payload;\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 310,
+        "y": 320,
+        "wires": [
+            [
+                "c9e612eddce6d4cd"
+            ]
+        ]
+    },
+    {
+        "id": "78d2d6fedb43bcda",
+        "type": "function",
+        "z": "0f4917b0fac269df",
+        "name": "格式化响应",
+        "func": "// 获取查询参数\nconst { id } = msg.params || {};\n// sql查表结果\nconst list = msg.payload[0] && msg.payload[0].json.data || [];\n\n// 查找指定ID的示例\nconst example = list.find(item => item.id === id);\n\nif (!example) {\n    msg.payload = {\n        code: 400,\n        success: false,\n        message: \"examplePage.exampleNotFound\"\n    };\n    return msg;\n}\n\n// 构建响应\nconst response = {\n  code: 200,\n  success: true,\n  data: example\n};\n\nmsg.payload = response;\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 760,
+        "y": 320,
+        "wires": [
+            [
+                "ea8351c798c38714"
+            ]
+        ]
+    },
+    {
+        "id": "ea8351c798c38714",
+        "type": "http response",
+        "z": "0f4917b0fac269df",
+        "name": "返回响应",
+        "statusCode": "200",
+        "headers": {},
+        "x": 950,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "c9e612eddce6d4cd",
+        "type": "postgresql",
+        "z": "0f4917b0fac269df",
+        "name": "searchExample",
+        "query": "select * from \"example\" ORDER BY \"timeStamp\" DESC limit 1;",
+        "postgreSQLConfig": "c48ecc2ef69b5a15",
+        "split": false,
+        "rowsPerMsg": "1",
+        "outputs": 1,
+        "x": 510,
+        "y": 320,
+        "wires": [
+            [
+                "78d2d6fedb43bcda"
+            ]
+        ]
+    },
+    {
+        "id": "fa3f8b2ed4aba1a0",
+        "type": "http in",
+        "z": "0f4917b0fac269df",
+        "name": "创建示例",
+        "url": "/example/create",
+        "method": "post",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 120,
+        "y": 440,
+        "wires": [
+            [
+                "a6891d2fb48590b9"
+            ]
+        ]
+    },
+    {
+        "id": "a6891d2fb48590b9",
+        "type": "function",
+        "z": "0f4917b0fac269df",
+        "name": "验证参数",
+        "func": "// POST请求的参数在msg.payload中\nmsg.params = msg.payload;\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 310,
+        "y": 440,
+        "wires": [
+            [
+                "4beb04fccfb01e22"
+            ]
+        ]
+    },
+    {
+        "id": "23e6628cf2eea879",
+        "type": "function",
+        "z": "0f4917b0fac269df",
+        "name": "格式化响应",
+        "func": "// 获取查询参数\nconst { code, name, description, status, ...formData } = msg.params || {};\nconst oldList = (msg.payload[0] && msg.payload[0].json && msg.payload[0].json.data) || [];\n\n// 验证必填字段\nif (!code || !name) {\n    msg.payload = { code: 400, success: false, message: \"examplePage.requiredFieldsEmpty\" };\n    return [null, msg];\n}\n\n// 校验code唯一性\nif (oldList.find(item => item.code === code)) {\n    msg.payload = { code: 400, success: false, message: \"examplePage.codeExists\" };\n    return [null, msg];\n}\n\n// 生成新示例ID\nconst id = `example_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;\n\n// 创建新示例对象\nconst newExample = {\n    ...formData,\n    id,\n    code,\n    name,\n    description: description || '',\n    status: status || 'active',\n    created_by: \"system\",\n    created_at: new Date().getTime(),\n    updated_at: new Date().getTime()\n};\n\n// 将新示例添加到列表\nconst newList = [...oldList, newExample];\n\n// 更新数据库\nconst mqttMsg = { payload: { data: newList } };\n\n// 构建响应\nmsg.payload = { code: 200, success: true, data: newExample, message: \"examplePage.createSuccess\" };\n\nreturn [mqttMsg, msg];",
+        "outputs": 2,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 720,
+        "y": 440,
+        "wires": [
+            [
+                "6e5c7d2970a4a808"
+            ],
+            [
+                "3c181f5cdcfbe681"
+            ]
+        ]
+    },
+    {
+        "id": "4beb04fccfb01e22",
+        "type": "postgresql",
+        "z": "0f4917b0fac269df",
+        "name": "searchExample",
+        "query": "select * from \"example\" ORDER BY \"timeStamp\" DESC limit 1;",
+        "postgreSQLConfig": "c48ecc2ef69b5a15",
+        "split": false,
+        "rowsPerMsg": "1",
+        "outputs": 1,
+        "x": 510,
+        "y": 440,
+        "wires": [
+            [
+                "23e6628cf2eea879"
+            ]
+        ]
+    },
+    {
+        "id": "8694b5daa1b0ef33",
+        "type": "http in",
+        "z": "0f4917b0fac269df",
+        "name": "更新示例",
+        "url": "/example/update",
+        "method": "post",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 120,
+        "y": 540,
+        "wires": [
+            [
+                "e1d6e4cc822a24e7"
+            ]
+        ]
+    },
+    {
+        "id": "e1d6e4cc822a24e7",
+        "type": "function",
+        "z": "0f4917b0fac269df",
+        "name": "验证参数",
+        "func": "// POST请求的参数在msg.payload中\nmsg.params = msg.payload;\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 310,
+        "y": 540,
+        "wires": [
+            [
+                "3c44f4a313c0c143"
+            ]
+        ]
+    },
+    {
+        "id": "606aadf706ffe138",
+        "type": "function",
+        "z": "0f4917b0fac269df",
+        "name": "格式化响应",
+        "func": "// 获取查询参数\nconst { id, code, name, description, status } = msg.params || {};\n\n// 验证必填字段\nif (!id || !code || !name) {\n    msg.payload = { code: 400, success: false, message: \"examplePage.requiredFieldsEmpty\" };\n    return [null, msg];\n}\n\n// 查找要更新的示例\nconst oldList = (msg.payload[0] && msg.payload[0].json && msg.payload[0].json.data) || [];\nconst exampleIndex = oldList.findIndex(item => item.id === id);\n\nif (exampleIndex === -1) {\n    msg.payload = { code: 400, success: false, message: \"examplePage.exampleNotFound\" };\n    return [null, msg];\n}\n\n// 校验code唯一性（排除当前示例）\nconst duplicateCode = oldList.find(item => item.code === code && item.id !== id);\n\nif (duplicateCode) {\n    msg.payload = { code: 400, success: false, message: \"examplePage.codeExists\" };\n    return [null, msg];\n}\n\nconst oldItem = oldList[exampleIndex] || {};\n// 更新示例\nconst updatedExample = {\n    ...oldItem,\n    code,\n    name,\n    description: description || '',\n    status: status || 'active',\n    updated_by: \"system\",\n    updated_at: new Date().getTime()\n};\n\n// 更新列表\nconst newList = [...oldList];\nnewList[exampleIndex] = updatedExample;\n\n// 更新数据库\nconst mqttMsg = { payload: { data: newList } };\n\n// 构建响应\nmsg.payload = { code: 200, success: true, data: updatedExample, message: \"examplePage.updateSuccess\" };\n\nreturn [mqttMsg, msg];",
+        "outputs": 2,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 720,
+        "y": 540,
+        "wires": [
+            [
+                "201eef9818b996e5"
+            ],
+            [
+                "7eac5df9ee6c32f3"
+            ]
+        ]
+    },
+    {
+        "id": "7eac5df9ee6c32f3",
+        "type": "http response",
+        "z": "0f4917b0fac269df",
+        "name": "返回响应",
+        "statusCode": "200",
+        "headers": {},
+        "x": 960,
+        "y": 580,
+        "wires": []
+    },
+    {
+        "id": "3c44f4a313c0c143",
+        "type": "postgresql",
+        "z": "0f4917b0fac269df",
+        "name": "searchExample",
+        "query": "select * from \"example\" ORDER BY \"timeStamp\" DESC limit 1;",
+        "postgreSQLConfig": "c48ecc2ef69b5a15",
+        "split": false,
+        "rowsPerMsg": "1",
+        "outputs": 1,
+        "x": 510,
+        "y": 540,
+        "wires": [
+            [
+                "606aadf706ffe138"
+            ]
+        ]
+    },
+    {
+        "id": "6e5c7d2970a4a808",
+        "type": "mqtt out",
+        "z": "0f4917b0fac269df",
+        "name": "exampleBroker",
+        "topic": "AMS/ERP/State/example",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "85bb67b2dbefe3ba",
+        "x": 960,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "0a0e01a87eaaed9a",
+        "type": "http in",
+        "z": "0f4917b0fac269df",
+        "name": "删除示例",
+        "url": "/example/delete",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 120,
+        "y": 640,
+        "wires": [
+            [
+                "d10be5ea62ade4e4"
+            ]
+        ]
+    },
+    {
+        "id": "d10be5ea62ade4e4",
+        "type": "function",
+        "z": "0f4917b0fac269df",
+        "name": "验证参数",
+        "func": "// GET请求的参数在msg.payload中\nmsg.params = msg.payload;\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 310,
+        "y": 640,
+        "wires": [
+            [
+                "7e2b19e167c268ce"
+            ]
+        ]
+    },
+    {
+        "id": "17394b7a7040b13b",
+        "type": "function",
+        "z": "0f4917b0fac269df",
+        "name": "格式化响应",
+        "func": "// 获取查询参数\nconst { id } = msg.params || {};\n\n// 验证必填字段\nif (!id) {\n    msg.payload = { code: 400, success: false, message: \"examplePage.idRequired\" };\n    return [null, msg];\n}\n\n// 查找要删除的示例\nconst oldList = (msg.payload[0] && msg.payload[0].json && msg.payload[0].json.data) || [];\nconst exampleIndex = oldList.findIndex(item => item.id === id);\n\nif (exampleIndex === -1) {\n    msg.payload = { code: 400, success: false, message: \"examplePage.exampleNotFound\" };\n    return [null, msg];\n}\n\n// 删除示例\noldList.splice(exampleIndex, 1);\n\n// 更新数据库\nconst mqttMsg = { payload: { data: oldList } };\n\n// 构建响应\nmsg.payload = { code: 200, success: true, message: \"examplePage.deleteSuccess\" };\n\nreturn [mqttMsg, msg];",
+        "outputs": 2,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 720,
+        "y": 640,
+        "wires": [
+            [
+                "900982b9cacacd3d"
+            ],
+            [
+                "9c54794e954d4275"
+            ]
+        ]
+    },
+    {
+        "id": "9c54794e954d4275",
+        "type": "http response",
+        "z": "0f4917b0fac269df",
+        "name": "返回响应",
+        "statusCode": "200",
+        "headers": {},
+        "x": 960,
+        "y": 680,
+        "wires": []
+    },
+    {
+        "id": "7e2b19e167c268ce",
+        "type": "postgresql",
+        "z": "0f4917b0fac269df",
+        "name": "searchExample",
+        "query": "select * from \"example\" ORDER BY \"timeStamp\" DESC limit 1;",
+        "postgreSQLConfig": "c48ecc2ef69b5a15",
+        "split": false,
+        "rowsPerMsg": "1",
+        "outputs": 1,
+        "x": 510,
+        "y": 640,
+        "wires": [
+            [
+                "17394b7a7040b13b"
+            ]
+        ]
+    },
+    {
+        "id": "201eef9818b996e5",
+        "type": "mqtt out",
+        "z": "0f4917b0fac269df",
+        "name": "exampleBroker",
+        "topic": "AMS/ERP/State/example",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "85bb67b2dbefe3ba",
+        "x": 960,
+        "y": 520,
+        "wires": []
+    },
+    {
+        "id": "900982b9cacacd3d",
+        "type": "mqtt out",
+        "z": "0f4917b0fac269df",
+        "name": "exampleBroker",
+        "topic": "AMS/ERP/State/example",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "85bb67b2dbefe3ba",
+        "x": 960,
+        "y": 620,
+        "wires": []
+    },
+    {
+        "id": "3c181f5cdcfbe681",
+        "type": "http response",
+        "z": "0f4917b0fac269df",
+        "name": "返回响应",
+        "statusCode": "200",
+        "headers": {},
+        "x": 960,
+        "y": 460,
+        "wires": []
+    },
+    {
+        "id": "017cfddf593dcb21",
+        "type": "catch",
+        "z": "0f4917b0fac269df",
+        "name": "",
+        "uncaught": false,
+        "x": 400,
+        "y": 720,
+        "wires": [
+            [
+                "419905cba175c4fb"
+            ]
+        ]
+    },
+    {
+        "id": "34606cdba648ebd8",
+        "type": "http response",
+        "z": "0f4917b0fac269df",
+        "name": "返回响应",
+        "statusCode": "200",
+        "headers": {},
+        "x": 840,
+        "y": 720,
+        "wires": []
+    },
+    {
+        "id": "419905cba175c4fb",
+        "type": "function",
+        "z": "0f4917b0fac269df",
+        "name": "错误返回处理",
+        "func": "msg.payload = { code: 400, success: false, message: msg.payload }; return msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 660,
+        "y": 720,
+        "wires": [
+            [
+                "34606cdba648ebd8"
+            ]
+        ]
+    },
+    {
+        "id": "c48ecc2ef69b5a15",
+        "type": "postgreSQLConfig",
+        "name": "",
+        "host": "postgresql",
+        "hostFieldType": "str",
+        "port": "5432",
+        "portFieldType": "num",
+        "database": "postgres",
+        "databaseFieldType": "str",
+        "ssl": "false",
+        "sslFieldType": "bool",
+        "applicationName": "",
+        "applicationNameType": "str",
+        "max": "10",
+        "maxFieldType": "num",
+        "idle": "1000",
+        "idleFieldType": "num",
+        "connectionTimeout": "10000",
+        "connectionTimeoutFieldType": "num",
+        "user": "postgres",
+        "userFieldType": "str",
+        "password": "postgres",
+        "passwordFieldType": "str"
+    },
+    {
+        "id": "85bb67b2dbefe3ba",
+        "type": "mqtt-broker",
+        "name": "emqx:1883",
+        "broker": "emqx",
+        "port": 1883,
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    }
+]
